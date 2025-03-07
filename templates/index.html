@@ -1,0 +1,171 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Quét QR & Đăng Ký</title>
+    <script src="https://unpkg.com/html5-qrcode"></script>
+</head>
+<body>
+    <h2>Quản lý Vé</h2>
+    
+    <!-- Menu chọn chức năng -->
+    <select id="menu" onchange="switchMode()">
+        <option value="add">Thêm vé mới</option>
+        <option value="checkin">Check-in vé</option>
+    </select>
+
+    <!-- Khu vực quét QR -->
+    <h3>Quét QR</h3>
+    <div id="qr-reader"></div>
+
+    <!-- Form Thêm vé mới -->
+    <form id="add-form" style="display:block;" enctype="multipart/form-data">
+        <h3>Thêm vé mới</h3>
+        <label>CODE: <input type="text" id="code" readonly></label><br>
+        <label>Tên: <input type="text" id="ten" required></label><br>
+        <label>MSSV: <input type="text" id="mssv" required></label><br>
+        <label>Email: <input type="email" id="mail" required></label><br>
+        <label>SĐT: <input type="text" id="sdt" required></label><br>
+
+        <label>Phương thức thanh toán:</label>
+        <select id="phuong_thuc_thanh_toan" required>
+            <option value="">-- Chọn --</option>
+            <option value="tiền mặt">Tiền mặt</option>
+            <option value="chuyển khoản">Chuyển khoản</option>
+        </select>
+        <br>
+
+        <label>Trạng thái:</label>
+        <select id="trang_thai" required>
+            <option value="chưa mua">Chưa mua</option>
+            <option value="đã mua vé">Đã mua vé</option>
+            <option value="đã check in">Đã check in</option>
+        </select>
+        <br>
+
+        <button type="button" onclick="saveData()">Lưu</button>
+    </form>
+
+    <!-- Form Check-in vé -->
+    <form id="checkin-form" style="display:none;">
+        <h3>Check-in vé</h3>
+        <label>CODE: <input type="text" id="checkin-code" readonly></label><br>
+        <label>Tên: <input type="text" id="checkin-ten" readonly></label><br>
+        <label>MSSV: <input type="text" id="checkin-mssv" readonly></label><br>
+        <label>Email: <input type="text" id="checkin-mail" readonly></label><br>
+        <label>SĐT: <input type="text" id="checkin-sdt" readonly></label><br>
+        <label>Trạng thái: <input type="text" id="checkin-trang-thai" readonly></label><br>
+
+        <button type="button" onclick="checkIn()">Check-in</button>
+    </form>
+
+    <script>
+        let html5QrCode;
+
+        function switchMode() {
+            let mode = document.getElementById("menu").value;
+            document.getElementById("add-form").style.display = (mode === "add") ? "block" : "none";
+            document.getElementById("checkin-form").style.display = (mode === "checkin") ? "block" : "none";
+            
+            restartCamera();  // 🚀 Luôn khởi động lại camera khi chuyển chế độ
+        }
+
+        function restartCamera() {
+            if (html5QrCode) {
+                html5QrCode.stop().then(() => {
+                    console.log("🔄 Camera khởi động lại...");
+                    startCamera();
+                }).catch(err => console.error("❌ Lỗi dừng camera:", err));
+            } else {
+                startCamera();
+            }
+        }
+
+        function startCamera() {
+            html5QrCode = new Html5Qrcode("qr-reader");
+            html5QrCode.start(
+                { facingMode: "environment" },
+                { fps: 10, qrbox: { width: 250, height: 250 } },
+                onScanSuccess
+            ).catch(err => console.error("❌ Lỗi mở camera:", err));
+        }
+
+        function onScanSuccess(qrCodeMessage) {
+            console.log("📩 QR Code quét được:", qrCodeMessage);
+
+            fetch('/scan', {
+                method: "POST",
+                headers: {"Content-Type": "application/json"},
+                body: JSON.stringify({code: qrCodeMessage})
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.status === "found") {
+                    if (document.getElementById("menu").value === "add") {
+                        document.getElementById("code").value = data.code;
+                        document.getElementById("add-form").style.display = "block";
+                    } else {
+                        document.getElementById("checkin-code").value = data.code;
+                        document.getElementById("checkin-ten").value = data.data.TEN || "";
+                        document.getElementById("checkin-mssv").value = data.data.MSSV || "";
+                        document.getElementById("checkin-mail").value = data.data.MAIL || "";
+                        document.getElementById("checkin-sdt").value = data.data.SDT || "";
+                        document.getElementById("checkin-trang-thai").value = data.data.TRANG_THAI || "chưa mua";
+                        document.getElementById("checkin-form").style.display = "block";
+                    }
+                } else {
+                    alert("❌ QR Code không tồn tại trong hệ thống!");
+                }
+            })
+            .catch(error => console.error("❌ Lỗi khi quét QR:", error));
+        }
+
+        function saveData() {
+            let formData = new FormData();
+            formData.append("ten", document.getElementById("ten").value);
+            formData.append("mssv", document.getElementById("mssv").value);
+            formData.append("mail", document.getElementById("mail").value);
+            formData.append("sdt", document.getElementById("sdt").value);
+            formData.append("phuong_thuc_thanh_toan", document.getElementById("phuong_thuc_thanh_toan").value);
+            formData.append("trang_thai", document.getElementById("trang_thai").value);
+
+            fetch('/update', {
+                method: "POST",
+                body: formData
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.message === "Cập nhật thành công!") {
+                    alert("✅ Cập nhật thành công!");
+                    document.getElementById("add-form").reset();
+                    document.getElementById("add-form").style.display = "none";
+                } else {
+                    alert("❌ Lỗi cập nhật: " + data.error);
+                }
+            })
+            .catch(error => console.error("❌ Fetch error:", error));
+        }
+
+        function checkIn() {
+            let code = document.getElementById("checkin-code").value;
+
+            fetch('/checkin', {
+                method: "POST",
+                headers: {"Content-Type": "application/json"},
+                body: JSON.stringify({code: code})
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.message === "Check-in thành công!") {
+                    alert("✅ Đã check-in thành công!");
+                    document.getElementById("checkin-trang-thai").value = "đã check in";
+                } else {
+                    alert("❌ Lỗi check-in: " + data.error);
+                }
+            })
+            .catch(error => console.error("❌ Fetch error:", error));
+        }
+    </script>
+</body>
+</html>
