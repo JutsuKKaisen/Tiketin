@@ -3,6 +3,5 @@ Flask-Login
 Flask-Session
 gspread
 oauth2client
-html5-qrcode
 gunicorn
 python-dotenv
