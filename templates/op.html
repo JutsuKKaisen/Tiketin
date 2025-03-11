@@ -1,0 +1,27 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <title>Check-in Vé</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}">
+    <script src="https://unpkg.com/html5-qrcode"></script>
+</head>
+<body>
+    <div class="container">
+        <h2>Check-in Vé</h2>
+        <div id="qr-reader"></div>
+        <div id="ticket-info" style="display: none;">
+            <h3>Thông Tin Vé</h3>
+            <p><strong>Tên:</strong> <span id="ticket-name"></span></p>
+            <p><strong>MSSV:</strong> <span id="ticket-mssv"></span></p>
+            <p><strong>Lớp:</strong> <span id="ticket-class"></span></p>
+            <p><strong>Email:</strong> <span id="ticket-email"></span></p>
+            <p><strong>SĐT:</strong> <span id="ticket-phone"></span></p>
+            <p><strong>Trạng thái:</strong> <span id="ticket-status"></span></p>
+        </div>
+        <a href="/logout">Đăng xuất</a>
+    </div>
+
+    <script src="{{ url_for('static', filename='script.js') }}"></script>
+</body>
+</html>

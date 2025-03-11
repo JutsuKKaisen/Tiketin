@@ -1,0 +1,30 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <title>Hệ Thống Quản Lý Vé</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}">
+</head>
+<body>
+    <div class="container">
+        <h2>Chào mừng, {{ current_user.id }}</h2>
+        <h3>Chọn chức năng</h3>
+
+        {% if role == "admin" %}
+        <div class="section">
+            <h3>Thêm Vé từ CSV</h3>
+            <input type="file" id="csv-file" accept=".csv">
+            <button onclick="importCSV()">Tải lên & Cập nhật</button>
+        </div>
+        <div class="section">
+            <h3>Check-in Vé</h3>
+            <a href="/checkin"><button>Đi đến Check-in</button></a>
+        </div>
+        {% endif %}
+
+        <a href="/logout">Đăng xuất</a>
+    </div>
+
+    <script src="{{ url_for('static', filename='script.js') }}"></script>
+</body>
+</html>
