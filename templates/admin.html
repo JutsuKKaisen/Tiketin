@@ -2,25 +2,29 @@
 <html lang="vi">
 <head>
     <meta charset="UTF-8">
-    <title>Hệ Thống Quản Lý Vé</title>
+    <title>Quản lý Vé - Admin</title>
     <link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}">
 </head>
 <body>
     <div class="container">
-        <h2>Chào mừng, {{ current_user.id }}</h2>
-        <h3>Chọn chức năng</h3>
-
-        {% if role == "admin" %}
+        <h2>Chào mừng, Admin</h2>
+        
         <div class="section">
-            <h3>Thêm Vé từ CSV</h3>
+            <h3>📂 Quản lý Vé</h3>
             <input type="file" id="csv-file" accept=".csv">
             <button onclick="importCSV()">Tải lên & Cập nhật</button>
         </div>
+
         <div class="section">
-            <h3>Check-in Vé</h3>
-            <a href="/checkin"><button>Đi đến Check-in</button></a>
+            <h3>📋 Xem Danh Sách Vé</h3>
+            <button onclick="viewTickets()">Xem Tất Cả Vé</button>
+            <div id="ticket-list"></div>
         </div>
-        {% endif %}
+
+        <div class="section">
+            <h3>✅ Check-in Vé</h3>
+            <a href="/op"><button>Đi đến Check-in</button></a>
+        </div>
 
         <a href="/logout">Đăng xuất</a>
     </div>
