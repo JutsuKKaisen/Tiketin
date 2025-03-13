@@ -1,0 +1,19 @@
+<script>
+    document.addEventListener("DOMContentLoaded", function() {
+        fetch("/get_role")  // Gọi API lấy role từ session
+        .then(response => response.json())
+        .then(data => {
+            if (data.role === "admin") {
+                document.getElementById("admin-options").style.display = "block";
+            } else {
+                document.getElementById("admin-options").style.display = "none";
+            }
+        });
+    });
+</script>
+
+<div id="admin-options" style="display: none;">
+    <h3>Quản lý hệ thống</h3>
+    <a href="/checkin"><button>🔍 Check-in Vé</button></a>
+    <a href="/upload_csv"><button>📂 Tải Lên CSV</button></a>
+</div>

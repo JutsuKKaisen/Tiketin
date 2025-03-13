@@ -1,0 +1,69 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <title>Danh Sách Vé</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}">
+</head>
+<body>
+    <h2>📜 Danh Sách Vé</h2>
+
+    <input type="text" id="searchBox" placeholder="🔍 Tìm kiếm..." onkeyup="searchTable()">
+
+    <table border="1" id="ticketTable">
+        <thead>
+            <tr>
+                <th onclick="sortTable(0)">CODE 🔽</th>
+                <th onclick="sortTable(1)">Tên 🔽</th>
+                <th onclick="sortTable(2)">MSSV 🔽</th>
+                <th onclick="sortTable(3)">Lớp 🔽</th>
+                <th onclick="sortTable(4)">Email 🔽</th>
+                <th onclick="sortTable(5)">SĐT 🔽</th>
+                <th onclick="sortTable(6)">Trạng Thái 🔽</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for ticket in records %}
+            <tr>
+                <td>{{ ticket.CODE }}</td>
+                <td>{{ ticket.TEN }}</td>
+                <td>{{ ticket.MSSV }}</td>
+                <td>{{ ticket.LOP }}</td>
+                <td>{{ ticket.MAIL }}</td>
+                <td>{{ ticket.SDT }}</td>
+                <td>{{ ticket.trangthai }}</td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+
+    <a href="/">⬅ Quay lại</a>
+
+    <script>
+        function searchTable() {
+            let input = document.getElementById("searchBox").value.toLowerCase();
+            let rows = document.querySelectorAll("#ticketTable tbody tr");
+
+            rows.forEach(row => {
+                let text = row.innerText.toLowerCase();
+                row.style.display = text.includes(input) ? "" : "none";
+            });
+        }
+
+        function sortTable(n) {
+            let table = document.getElementById("ticketTable");
+            let rows = Array.from(table.rows).slice(1);
+            let ascending = table.getAttribute("data-sort") !== "asc";
+
+            rows.sort((rowA, rowB) => {
+                let cellA = rowA.cells[n].innerText.toLowerCase();
+                let cellB = rowB.cells[n].innerText.toLowerCase();
+                return ascending ? (cellA > cellB ? 1 : -1) : (cellA < cellB ? 1 : -1);
+            });
+
+            table.tBodies[0].append(...rows);
+            table.setAttribute("data-sort", ascending ? "asc" : "desc");
+        }
+    </script>
+</body>
+</html>

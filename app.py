@@ -5,6 +5,7 @@ from dotenv import load_dotenv
 import gspread
 from oauth2client.service_account import ServiceAccountCredentials
 from flask_login import LoginManager, UserMixin, login_user, logout_user, login_required, current_user
+from werkzeug.utils import secure_filename
 
 app = Flask(__name__)
 
@@ -68,7 +69,7 @@ def dashboard():
     if current_user.role == "admin":
         return render_template("admin.html", role="admin")
     else:
-        return render_template("op.html", role="op")
+        return render_template("checkin.html", role="op")
 
 @app.route("/logout")
 @login_required
@@ -77,63 +78,79 @@ def logout():
     logout_user()
     return redirect(url_for("login"))
 
-@app.route("/import-csv", methods=["POST"])
+@app.route("/view_tickets")
 @login_required
-def import_csv():
-    """ Chỉ Admin có quyền tải file CSV lên """
+def view_tickets():
+    """ Hiển thị danh sách vé từ Google Sheets """
     if current_user.role != "admin":
-        return jsonify({"error": "Bạn không có quyền truy cập!"}), 403
+        return "❌ Bạn không có quyền truy cập!", 403
+
+    records = sheet.get_all_records()
+    return render_template("view_tickets.html", records=records)
+
+@app.route("/upload_csv", methods=["GET", "POST"])
+@login_required
+def upload_csv():
+    """Admin tải lên file CSV để nhập dữ liệu vé"""
+        # Kiểm tra quyền admin
+    if current_user.role != "admin":
+        return jsonify({"error": "Bạn không có quyền upload file CSV!"}), 403
+
+    if request.method == "GET":
+        return render_template("upload_csv.html")  # Hiển thị form upload CSV
+
+    # Kiểm tra có file không
+    if "file" not in request.files:
+        return jsonify({"error": "Không tìm thấy file trong request!"}), 400
+
+    file = request.files["file"]
+    if file.filename == "":
+        return jsonify({"error": "File không có tên!"}), 400
+
+    if not file.filename.endswith(".csv"):
+        return jsonify({"error": "Chỉ chấp nhận file CSV!"}), 400
 
     try:
-        if "file" not in request.files:
-            return jsonify({"error": "Thiếu file CSV!"}), 400
+        # Đọc nội dung CSV
+        file_contents = file.read().decode("utf-8").splitlines()
+        csv_reader = csv.reader(file_contents)
 
-        file = request.files["file"]
-        if not file.filename.endswith(".csv"):
-            return jsonify({"error": "File phải có định dạng .csv"}), 400
+        # Bỏ qua dòng tiêu đề
+        header = next(csv_reader, None)
+        expected_columns = ["TEN", "MSSV", "LOP", "MAIL", "SDT"]
+        
+        if header != expected_columns:
+            return jsonify({"error": f"Định dạng CSV không đúng! Cần các cột: {expected_columns}"}), 400
 
-        csv_data = list(csv.reader(file.read().decode("utf-8").splitlines()))
-        headers = csv_data[0]
-        rows = csv_data[1:]
+        # Lấy danh sách vé chưa đăng ký (CODE chưa có thông tin)
+        records = sheet.get_all_records()
+        empty_tickets = [r for r in records if not any(r[k] for k in expected_columns)]
 
-        required_fields = ["Tên", "MSSV", "Lớp", "Email", "SĐT"]
-        if not all(field in headers for field in required_fields):
-            return jsonify({"error": "Thiếu cột dữ liệu trong file CSV"}), 400
+        # Kiểm tra số lượng vé trống có đủ không
+        csv_data = list(csv_reader)
+        if len(empty_tickets) < len(csv_data):
+            return jsonify({"error": "Số lượng vé trống không đủ để đăng ký!"}), 400
 
-        # Lấy dữ liệu hiện tại từ Google Sheets
-        all_records = sheet.get_all_records()
+        # Ghi dữ liệu lên Google Sheets
+        for i, row in enumerate(csv_data):
+            row_index = records.index(empty_tickets[i]) + 2  # Hàng trong Google Sheets
+            print(f"📌 Ghi dữ liệu vào hàng {row_index}: {row}")  # Debug log
+            
+            sheet.update(f"B{row_index}:F{row_index}", [row])  # Ghi dữ liệu từ cột B đến F
 
-        # Xác định các vé chưa đăng ký
-        unregistered_qrs = [
-            row for row in all_records
-            if row["CODE"] and not any(row[field] for field in ["TEN", "MSSV", "LỚP", "MAIL", "SDT"])
-        ]
-
-        if len(unregistered_qrs) < len(rows):
-            return jsonify({"error": "Số lượng QR chưa đăng ký không đủ"}), 400
-
-        # Gán dữ liệu từ CSV vào QR chưa đăng ký
-        updates = []
-        for index, row in enumerate(rows):
-            qr_code = unregistered_qrs[index]["CODE"]
-            updates.append([
-                qr_code, row[0], row[1], row[2], row[3], row[4], "đã mua vé"
-            ])
-
-        # Cập nhật dữ liệu Google Sheets
-        sheet.update(f"A2:G{len(updates) + 1}", updates)
-        return jsonify({"message": f"Đã cập nhật {len(updates)} vé!"}), 200
+        return jsonify({"message": "✅ File CSV đã được tải lên thành công!"})
 
     except Exception as e:
-        return jsonify({"error": str(e)}), 500
+        print(f"❌ Lỗi xử lý CSV: {e}")  # Debug log
+        return jsonify({"error": f"Lỗi xử lý CSV: {str(e)}"}), 500
 
 @app.route("/checkin", methods=["GET", "POST"])
 @login_required
 def checkin():
+    """ OP và Admin có thể check-in vé """
     if request.method == "GET":
-        return render_template("op.html")  # Trả về trang quét QR cho Admin
-    
-    """ OP có quyền check-in vé """
+        return render_template("checkin.html", role=current_user.role)  # Admin & OP đều truy cập
+
     try:
         data = request.json
         code = data.get("code", "").strip()
@@ -151,17 +168,18 @@ def checkin():
 
         row_index = records.index(row_data) + 2  # Hàng trong Google Sheets
 
-        # Cập nhật trạng thái check-in
-        sheet.update(f"G{row_index}", [["đã check in"]])
+        # Nếu là OP, cập nhật trạng thái check-in
+        if current_user.role == "op":
+            sheet.update(f"G{row_index}", [["đã check in"]])
 
         return jsonify({
-            "message": "Check-in thành công!",
+            "message": "Check-in thành công!" if current_user.role == "op" else "Thông tin vé",
             "ten": row_data["TEN"],
             "mssv": row_data["MSSV"],
-            "lop": row_data["LỚP"],
+            "lop": row_data["LOP"],
             "mail": row_data["MAIL"],
             "sdt": row_data["SDT"],
-            "trangthai": "Đã Check-in"
+            "trangthai": "Đã Check-in" if current_user.role == "op" else row_data.get("trangthai", "Chưa check-in")
         }), 200
 
     except Exception as e:

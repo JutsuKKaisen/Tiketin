@@ -1,0 +1,22 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <title>Upload CSV</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}">
+</head>
+<body>
+    <h2>📂 Tải Lên File CSV</h2>
+
+    <form id="upload-form">
+        <input type="file" id="csv-file" accept=".csv">
+        <button type="submit">🚀 Upload</button>
+    </form>
+
+    <p id="upload-status"></p>
+
+    <a href="/">⬅ Quay lại</a>
+
+    <script src="{{ url_for('static', filename='script.js') }}"></script>
+</body>
+</html>

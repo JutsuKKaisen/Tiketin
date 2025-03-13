@@ -2,33 +2,29 @@
 <html lang="vi">
 <head>
     <meta charset="UTF-8">
-    <title>Quản lý Vé - Admin</title>
+    <title>Quản lý Hệ Thống</title>
     <link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}">
 </head>
 <body>
-    <div class="container">
-        <h2>Chào mừng, Admin</h2>
-        
-        <div class="section">
-            <h3>📂 Quản lý Vé</h3>
-            <input type="file" id="csv-file" accept=".csv">
-            <button onclick="importCSV()">Tải lên & Cập nhật</button>
-        </div>
+    <h2>🔹 Quản lý Hệ Thống</h2>
 
-        <div class="section">
-            <h3>📋 Xem Danh Sách Vé</h3>
-            <button onclick="viewTickets()">Xem Tất Cả Vé</button>
-            <div id="ticket-list"></div>
-        </div>
-
-        <div class="section">
-            <h3>✅ Check-in Vé</h3>
-            <a href="/op"><button>Đi đến Check-in</button></a>
-        </div>
-
-        <a href="/logout">Đăng xuất</a>
+    <div class="menu">
+        <a href="/checkin"><button>🔍 Check-in Vé</button></a>
+        <a href="/view_tickets"><button>📜 Xem Danh Sách Vé</button></a>
+        <a href="/upload_csv"><button>📂 Tải Lên CSV</button></a>
+        <a href="/logout"><button>🚪 Đăng Xuất</button></a>
     </div>
 
-    <script src="{{ url_for('static', filename='script.js') }}"></script>
+    <script>
+        document.addEventListener("DOMContentLoaded", function() {
+            fetch("/get_role")
+            .then(response => response.json())
+            .then(data => {
+                if (data.role !== "admin") {
+                    window.location.href = "/checkin";  // Chặn OP truy cập
+                }
+            });
+        });
+    </script>
 </body>
 </html>
