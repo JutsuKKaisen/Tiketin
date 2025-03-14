@@ -2,20 +2,101 @@
 <html lang="vi">
 <head>
     <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Upload CSV</title>
     <link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700&display=swap" rel="stylesheet">
+    <script src="https://kit.fontawesome.com/a076d05399.js" crossorigin="anonymous"></script>
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+        }
+        .container {
+            width: 90%;
+            max-width: 600px;
+            margin: auto;
+            padding: 20px;
+            text-align: center;
+        }
+        .navbar {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 15px 30px;
+            background-color: #fff;
+            border-radius: 12px;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+            margin-bottom: 20px;
+        }
+        .btn-back {
+            background: #666;
+            color: #fff;
+            padding: 10px 15px;
+            border-radius: 8px;
+            text-decoration: none;
+            font-size: 1em;
+        }
+        .btn-back:hover {
+            background: #888;
+        }
+        .upload-box {
+            background: #fff;
+            padding: 20px;
+            border-radius: 12px;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+            text-align: center;
+            margin-top: 20px;
+        }
+        .upload-box form {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+        .upload-box input {
+            width: calc(100% - 20px);
+            padding: 10px;
+            border-radius: 8px;
+            border: 1px solid #ccc;
+            font-size: 1em;
+            margin-bottom: 10px;
+            box-sizing: border-box;
+        }
+        .upload-box button {
+            width: 100%;
+            padding: 10px;
+            background-color: #007bff;
+            color: #fff;
+            font-weight: 600;
+            border: none;
+            border-radius: 8px;
+            font-size: 1em;
+            cursor: pointer;
+        }
+        .upload-box button:hover {
+            background-color: #0056b3;
+        }
+        #upload-status {
+            margin-top: 10px;
+            font-weight: bold;
+        }
+    </style>
 </head>
 <body>
-    <h2>📂 Tải Lên File CSV</h2>
+    <div class="container">
+        <nav class="navbar">
+            <h2><i class="fas fa-file-upload"></i> Tải Lên File CSV</h2>
+            <a href="/" class="btn-back"><i class="fas fa-arrow-left"></i> Quay lại</a>
+        </nav>
 
-    <form id="upload-form">
-        <input type="file" id="csv-file" accept=".csv">
-        <button type="submit">🚀 Upload</button>
-    </form>
-
-    <p id="upload-status"></p>
-
-    <a href="/">⬅ Quay lại</a>
+        <div class="upload-box">
+            <form id="upload-form">
+                <input type="file" id="csv-file" accept=".csv">
+                <button type="submit"><i class="fas fa-cloud-upload-alt"></i> Upload</button>
+            </form>
+        </div>
+        
+        <p id="upload-status"></p>
+    </div>
 
     <script src="{{ url_for('static', filename='script.js') }}"></script>
 </body>

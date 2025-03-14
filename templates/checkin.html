@@ -2,15 +2,73 @@
 <html lang="vi">
 <head>
     <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Check-in Vé</title>
     <link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700&display=swap" rel="stylesheet">
+    <script src="https://kit.fontawesome.com/a076d05399.js" crossorigin="anonymous"></script>
     <script src="https://unpkg.com/html5-qrcode"></script>
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+        }
+        .container {
+            width: 90%;
+            max-width: 800px;
+            margin: auto;
+            padding: 20px;
+            text-align: center;
+        }
+        .navbar {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 15px 30px;
+            background-color: #fff;
+            border-radius: 12px;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+            margin-bottom: 20px;
+        }
+        .btn-logout {
+            background: #666;
+            color: #fff;
+            padding: 10px 15px;
+            border-radius: 8px;
+            text-decoration: none;
+            font-size: 1em;
+        }
+        .btn-logout:hover {
+            background: #888;
+        }
+        #qr-reader {
+            margin: 20px auto;
+            max-width: 400px;
+        }
+        .ticket-info {
+            display: none;
+            background: #fff;
+            padding: 20px;
+            border-radius: 12px;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+            text-align: left;
+            margin-top: 20px;
+        }
+        .ticket-info p {
+            font-size: 1.1em;
+            margin: 5px 0;
+        }
+    </style>
 </head>
 <body>
     <div class="container">
-        <h2>🎫 Check-in Vé</h2>
+        <nav class="navbar">
+            <h2><i class="fas fa-qrcode"></i> Check-in Vé</h2>
+            <a href="/logout" class="btn-logout"><i class="fas fa-sign-out-alt"></i> Đăng Xuất</a>
+        </nav>
+
         <div id="qr-reader"></div>
-        <div id="ticket-info" style="display:none;">
+
+        <div id="ticket-info" class="ticket-info">
             <h3>Thông Tin Vé</h3>
             <p><strong>Họ Tên:</strong> <span id="ticket-name"></span></p>
             <p><strong>MSSV:</strong> <span id="ticket-mssv"></span></p>
@@ -19,7 +77,6 @@
             <p><strong>SĐT:</strong> <span id="ticket-phone"></span></p>
             <p><strong>Trạng Thái:</strong> <span id="ticket-status"></span></p>
         </div>
-        <a href="/logout">Đăng xuất</a>
     </div>
 
     <script src="{{ url_for('static', filename='script.js') }}"></script>

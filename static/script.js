@@ -8,6 +8,7 @@ document.addEventListener("DOMContentLoaded", function () {
     }
 });
 
+
 /* ===================== QUÉT QR & CHECK-IN ===================== */
 function startQRScanner() {
     let html5QrCode = new Html5Qrcode("qr-reader");

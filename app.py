@@ -6,6 +6,7 @@ import gspread
 from oauth2client.service_account import ServiceAccountCredentials
 from flask_login import LoginManager, UserMixin, login_user, logout_user, login_required, current_user
 from werkzeug.utils import secure_filename
+import time
 
 app = Flask(__name__)
 
@@ -24,9 +25,25 @@ creds = ServiceAccountCredentials.from_json_keyfile_name("credentials.json", sco
 client = gspread.authorize(creds)
 sheet = client.open("database_gculaw_tiketin").sheet1  # Cập nhật tên sheet
 
+# Cache dữ liệu để tránh truy xuất Google Sheets liên tục
+CACHE_DATA = {"records": [], "timestamp": 0}
+CACHE_EXPIRY = 60  # Cache trong 60 giây
+
+def get_cached_records():
+    global CACHE_DATA
+    current_time = time.time()
+    
+    # Nếu cache hết hạn, làm mới dữ liệu từ Google Sheets
+    if current_time - CACHE_DATA["timestamp"] > CACHE_EXPIRY:
+        CACHE_DATA["records"] = sheet.get_all_records()
+        CACHE_DATA["timestamp"] = current_time
+
+    return CACHE_DATA["records"]
+
 # Tài khoản hệ thống
 users = {
-    "admin": {"password": "admin123", "role": "admin"},
+    "ntn": {"password": "thanhnam", "role": "admin"},
+    "bcn": {"password": "gculaw", "role": "admin"},
     "operator": {"password": "op123", "role": "op"},
 }
 
@@ -92,56 +109,52 @@ def view_tickets():
 @login_required
 def upload_csv():
     """Admin tải lên file CSV để nhập dữ liệu vé"""
-        # Kiểm tra quyền admin
     if current_user.role != "admin":
         return jsonify({"error": "Bạn không có quyền upload file CSV!"}), 403
 
     if request.method == "GET":
-        return render_template("upload_csv.html")  # Hiển thị form upload CSV
+        return render_template("upload_csv.html")
 
-    # Kiểm tra có file không
     if "file" not in request.files:
         return jsonify({"error": "Không tìm thấy file trong request!"}), 400
 
     file = request.files["file"]
-    if file.filename == "":
-        return jsonify({"error": "File không có tên!"}), 400
-
-    if not file.filename.endswith(".csv"):
+    if file.filename == "" or not file.filename.endswith(".csv"):
         return jsonify({"error": "Chỉ chấp nhận file CSV!"}), 400
 
     try:
-        # Đọc nội dung CSV
+        # Đọc dữ liệu từ file CSV
         file_contents = file.read().decode("utf-8").splitlines()
         csv_reader = csv.reader(file_contents)
 
-        # Bỏ qua dòng tiêu đề
+        # Kiểm tra header
         header = next(csv_reader, None)
         expected_columns = ["TEN", "MSSV", "LOP", "MAIL", "SDT"]
-        
         if header != expected_columns:
             return jsonify({"error": f"Định dạng CSV không đúng! Cần các cột: {expected_columns}"}), 400
 
-        # Lấy danh sách vé chưa đăng ký (CODE chưa có thông tin)
-        records = sheet.get_all_records()
+        # Lấy vé trống từ cache
+        records = get_cached_records()
         empty_tickets = [r for r in records if not any(r[k] for k in expected_columns)]
 
-        # Kiểm tra số lượng vé trống có đủ không
         csv_data = list(csv_reader)
         if len(empty_tickets) < len(csv_data):
             return jsonify({"error": "Số lượng vé trống không đủ để đăng ký!"}), 400
 
-        # Ghi dữ liệu lên Google Sheets
+        # Chuẩn bị batch update
+        updates = []
         for i, row in enumerate(csv_data):
             row_index = records.index(empty_tickets[i]) + 2  # Hàng trong Google Sheets
-            print(f"📌 Ghi dữ liệu vào hàng {row_index}: {row}")  # Debug log
-            
-            sheet.update(f"B{row_index}:F{row_index}", [row])  # Ghi dữ liệu từ cột B đến F
+            updates.append({
+                'range': f"B{row_index}:F{row_index}",
+                'values': [row]
+            })
+
+        sheet.batch_update(updates)  # Ghi dữ liệu hàng loạt
 
         return jsonify({"message": "✅ File CSV đã được tải lên thành công!"})
 
     except Exception as e:
-        print(f"❌ Lỗi xử lý CSV: {e}")  # Debug log
         return jsonify({"error": f"Lỗi xử lý CSV: {str(e)}"}), 500
 
 @app.route("/checkin", methods=["GET", "POST"])
@@ -149,7 +162,7 @@ def upload_csv():
 def checkin():
     """ OP và Admin có thể check-in vé """
     if request.method == "GET":
-        return render_template("checkin.html", role=current_user.role)  # Admin & OP đều truy cập
+        return render_template("checkin.html", role=current_user.role)
 
     try:
         data = request.json
@@ -158,19 +171,19 @@ def checkin():
         if not code:
             return jsonify({"error": "Mã QR không hợp lệ!"}), 400
 
-        records = sheet.get_all_records()
+        # Chuyển danh sách thành từ điển để truy xuất nhanh hơn
+        records = get_cached_records()
+        record_dict = {r["CODE"]: r for r in records}
 
-        # Tìm hàng chứa QR Code
-        row_data = next((row for row in records if row["CODE"] == code), None)
+        if code not in record_dict:
+            return jsonify({"error": f"Không tìm thấy mã CODE `{code}` trong hệ thống!"}), 404
 
-        if not row_data:
-            return jsonify({"error": f"Không tìm thấy mã CODE `{code}` trong Google Sheets!"}), 404
-
+        row_data = record_dict[code]
         row_index = records.index(row_data) + 2  # Hàng trong Google Sheets
 
         # Nếu là OP, cập nhật trạng thái check-in
         if current_user.role == "op":
-            sheet.update(f"G{row_index}", [["đã check in"]])
+            sheet.update(values=[["Đã Check-in"]], range_name=f"G{row_index}")
 
         return jsonify({
             "message": "Check-in thành công!" if current_user.role == "op" else "Thông tin vé",
@@ -184,6 +197,3 @@ def checkin():
 
     except Exception as e:
         return jsonify({"error": str(e)}), 500
-
-if __name__ == '__main__':
-    app.run(host="0.0.0.0", port=5000, debug=True)

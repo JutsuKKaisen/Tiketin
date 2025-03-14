@@ -2,44 +2,125 @@
 <html lang="vi">
 <head>
     <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Danh Sách Vé</title>
     <link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700&display=swap" rel="stylesheet">
+    <script src="https://kit.fontawesome.com/a076d05399.js" crossorigin="anonymous"></script>
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+        }
+        .container {
+            width: 90%;
+            max-width: 1200px;
+            margin: auto;
+            padding: 20px;
+        }
+        .navbar {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 15px 30px;
+            background-color: #fff;
+            border-radius: 12px;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+            margin-bottom: 20px;
+        }
+        .search-box {
+            width: 100%;
+            max-width: 400px;
+            padding: 10px;
+            border-radius: 8px;
+            border: 1px solid #ccc;
+            font-size: 1em;
+            display: block;
+            margin: auto;
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 20px;
+            background: #fff;
+            border-radius: 8px;
+            overflow: hidden;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+        }
+        th, td {
+            padding: 12px;
+            text-align: center;
+            border-bottom: 1px solid #ddd;
+        }
+        th {
+            background: #007bff;
+            color: white;
+            cursor: pointer;
+        }
+        th:hover {
+            background: #0056b3;
+        }
+        .btn-back {
+            display: inline-block;
+            padding: 10px 20px;
+            margin-top: 20px;
+            background: #666;
+            color: #fff;
+            border-radius: 8px;
+            text-decoration: none;
+            font-size: 1em;
+        }
+        .btn-back:hover {
+            background: #888;
+        }
+        td:nth-child(2) {
+            text-align: left;
+            white-space: nowrap;
+            width: auto;
+        }
+        th:nth-child(2) {
+            text-align: center;
+        }
+    </style>
 </head>
 <body>
-    <h2>📜 Danh Sách Vé</h2>
+    <div class="container">
+        <nav class="navbar">
+            <h2><i class="fas fa-ticket-alt"></i> Danh Sách Vé</h2>
+            <a href="/" class="btn-back"><i class="fas fa-arrow-left"></i> Quay lại</a>
+        </nav>
 
-    <input type="text" id="searchBox" placeholder="🔍 Tìm kiếm..." onkeyup="searchTable()">
+        <input type="text" id="searchBox" class="search-box" placeholder="🔍 Tìm kiếm..." onkeyup="searchTable()">
 
-    <table border="1" id="ticketTable">
-        <thead>
-            <tr>
-                <th onclick="sortTable(0)">CODE 🔽</th>
-                <th onclick="sortTable(1)">Tên 🔽</th>
-                <th onclick="sortTable(2)">MSSV 🔽</th>
-                <th onclick="sortTable(3)">Lớp 🔽</th>
-                <th onclick="sortTable(4)">Email 🔽</th>
-                <th onclick="sortTable(5)">SĐT 🔽</th>
-                <th onclick="sortTable(6)">Trạng Thái 🔽</th>
-            </tr>
-        </thead>
-        <tbody>
-            {% for ticket in records %}
-            <tr>
-                <td>{{ ticket.CODE }}</td>
-                <td>{{ ticket.TEN }}</td>
-                <td>{{ ticket.MSSV }}</td>
-                <td>{{ ticket.LOP }}</td>
-                <td>{{ ticket.MAIL }}</td>
-                <td>{{ ticket.SDT }}</td>
-                <td>{{ ticket.trangthai }}</td>
-            </tr>
-            {% endfor %}
-        </tbody>
-    </table>
-
-    <a href="/">⬅ Quay lại</a>
+        <table id="ticketTable">
+            <thead>
+                <tr>
+                    <th onclick="sortTable(0)">CODE <i class="fas fa-sort"></i></th>
+                    <th onclick="sortTable(1)">Tên <i class="fas fa-sort"></i></th>
+                    <th onclick="sortTable(2)">MSSV <i class="fas fa-sort"></i></th>
+                    <th onclick="sortTable(3)">Lớp <i class="fas fa-sort"></i></th>
+                    <th onclick="sortTable(4)">Email <i class="fas fa-sort"></i></th>
+                    <th onclick="sortTable(5)">SĐT <i class="fas fa-sort"></i></th>
+                    <th onclick="sortTable(6)">Trạng Thái <i class="fas fa-sort"></i></th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for ticket in records %}
+                <tr>
+                    <td>{{ ticket.CODE }}</td>
+                    <td>{{ ticket.TEN }}</td>
+                    <td>{{ ticket.MSSV }}</td>
+                    <td>{{ ticket.LOP }}</td>
+                    <td>{{ ticket.MAIL }}</td>
+                    <td>{{ ticket.SDT | string }}</td>
+                    <td>{{ ticket.trangthai }}</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
 
     <script>
+        document.getElementById("sdtField").innerText = String(ticket.SDT);
         function searchTable() {
             let input = document.getElementById("searchBox").value.toLowerCase();
             let rows = document.querySelectorAll("#ticketTable tbody tr");
