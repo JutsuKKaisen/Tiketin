@@ -44,7 +44,12 @@ def get_cached_records():
 users = {
     "ntn": {"password": "thanhnam", "role": "admin"},
     "bcn": {"password": "gculaw", "role": "admin"},
-    "operator": {"password": "op123", "role": "op"},
+    "op1": {"password": "op123", "role": "op"},
+    "op2": {"password": "op123", "role": "op"},
+    "op3": {"password": "op123", "role": "op"},
+    "op4": {"password": "op123", "role": "op"},
+    "op5": {"password": "op123", "role": "op"},
+    "op6": {"password": "op123", "role": "op"},
 }
 
 class User(UserMixin):
