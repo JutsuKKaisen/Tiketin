@@ -1,10 +1,11 @@
 /* Global Styles */
 body {
     font-family: 'Inter', sans-serif;
-    background-color: #f5f5f5;
-    color: #222;
     margin: 0;
     padding: 0;
+    box-sizing: border-box;
+    background: linear-gradient(135deg, #d9d9d9, #f0f0f0); /* Slightly updated gradient */
+    color: #333; /* Darker font color for better readability */
     display: flex;
     justify-content: center;
     align-items: center;
@@ -14,6 +15,8 @@ body {
 .container {
     width: 90%;
     max-width: 1200px;
+    margin: auto;
+    padding: 20px;
 }
 
 /* Navigation Bar */
@@ -25,56 +28,70 @@ body {
     background-color: #fff;
     border-radius: 12px;
     box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+    margin-bottom: 20px;
 }
 
 .navbar a {
     text-decoration: none;
-    color: #222;
+    color: #333; /* Improved contrast for navbar links */
     font-weight: 500;
     transition: color 0.3s ease-in-out;
 }
 
 .navbar a:hover {
-    color: #007bff;
+    color: #0056b3; /* Darker hover color for better visibility */
 }
 
 /* Login Form */
-.login-container {
+.login-container, .upload-box {
     background: #fff;
     padding: 30px;
     border-radius: 12px;
     box-shadow: 0 10px 20px rgba(0, 0, 0, 0.1);
-    width: 350px;
     text-align: center;
 }
 
-.login-container h2 {
-    font-size: 1.8em;
+.login-container form, .upload-box form {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+
+.form-group {
+    width: 100%;
+    text-align: left;
     margin-bottom: 15px;
 }
 
-.login-container input {
+.form-group label {
+    display: block;
+    font-weight: 600;
+    margin-bottom: 5px;
+}
+
+.form-group input, .upload-box input {
     width: 100%;
     padding: 10px;
-    margin: 10px 0;
     border-radius: 8px;
     border: 1px solid #ccc;
     font-size: 1em;
+    box-sizing: border-box;
 }
 
-.login-container button {
+button {
     width: 100%;
-    padding: 10px;
-    background: #007bff;
+    padding: 12px;
+    background-color: #007bff;
     color: #fff;
+    font-weight: 600;
     border: none;
     border-radius: 8px;
     font-size: 1em;
     cursor: pointer;
 }
 
-.login-container button:hover {
-    background: #0056b3;
+button:hover {
+    background-color: #0056b3;
 }
 
 /* Dashboard & Cards */
@@ -90,6 +107,21 @@ body {
     padding: 20px;
     border-radius: 12px;
     box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+    text-align: center;
+    font-size: 1.2em;
+    font-weight: 600;
+    transition: transform 0.3s ease-in-out; /* Added hover effect */
+}
+
+.card a {
+    text-decoration: none;
+    color: #222;
+    display: block;
+}
+
+.card:hover {
+    background: #f1f1f1;
+    transform: scale(1.05); /* Slight zoom on hover */
 }
 
 .card h3 {
@@ -99,7 +131,7 @@ body {
 
 .card p {
     font-size: 1em;
-    color: #444;
+    color: #555; /* Improved contrast for card descriptions */
 }
 
 /* Buttons */
@@ -114,12 +146,12 @@ body {
 }
 
 .btn-primary {
-    background: #007bff;
+    background: #0056b3; /* Slightly darker button background */
     color: #fff;
 }
 
 .btn-primary:hover {
-    background: #0056b3;
+    background: #003f8a; /* Darker hover background for buttons */
 }
 
 .btn-secondary {
@@ -129,4 +161,59 @@ body {
 
 .btn-secondary:hover {
     background: #222;
+}
+
+/* Table */
+table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-top: 20px;
+    background: #fff;
+    border-radius: 8px;
+    overflow: hidden;
+    box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+}
+
+th, td {
+    padding: 12px;
+    text-align: center;
+    border-bottom: 1px solid #ddd;
+    color: #444; /* Slightly darker text for table content */
+}
+
+th {
+    background: #007bff;
+    color: white;
+    cursor: pointer;
+}
+
+th:hover {
+    background: #0056b3;
+}
+
+/* Responsive Styles */
+@media (max-width: 768px) {
+    body {
+        flex-direction: column;
+        padding: 10px;
+    }
+
+    .navbar {
+        flex-direction: column;
+        text-align: center;
+    }
+
+    .dashboard {
+        grid-template-columns: 1fr;
+        gap: 10px; /* Reduced gap between cards */
+    }
+
+    .card {
+        padding: 10px; /* Adjusted padding for smaller screens */
+    }
+
+    .login-container {
+        width: 100%;
+        padding: 15px; /* Reduced padding for smaller screens */
+    }
 }

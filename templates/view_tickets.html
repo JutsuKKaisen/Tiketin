@@ -8,77 +8,104 @@
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700&display=swap" rel="stylesheet">
     <script src="https://kit.fontawesome.com/a076d05399.js" crossorigin="anonymous"></script>
     <style>
-        body {
-            font-family: 'Inter', sans-serif;
-        }
-        .container {
-            width: 90%;
-            max-width: 1200px;
-            margin: auto;
-            padding: 20px;
-        }
-        .navbar {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            padding: 15px 30px;
-            background-color: #fff;
-            border-radius: 12px;
-            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
-            margin-bottom: 20px;
-        }
+        /* Improved search bar styling */
         .search-box {
             width: 100%;
             max-width: 400px;
-            padding: 10px;
-            border-radius: 8px;
+            padding: 10px 15px;
+            margin: 20px auto;
             border: 1px solid #ccc;
-            font-size: 1em;
-            display: block;
-            margin: auto;
+            border-radius: 8px; /* Updated to match global style */
+            font-size: 16px;
+            outline: none;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+            transition: all 0.3s ease;
         }
+
+        .search-box:focus {
+            border-color: #007bff;
+            box-shadow: 0 4px 8px rgba(0, 123, 255, 0.2);
+        }
+
+        /* Responsive table styling */
+        .container {
+            overflow-x: auto;
+        }
+
+        .table-container {
+            overflow-x: auto;
+            -webkit-overflow-scrolling: touch; /* Smooth scrolling on iOS */
+        }
+
         table {
             width: 100%;
             border-collapse: collapse;
-            margin-top: 20px;
+            margin: 20px 0;
             background: #fff;
             border-radius: 8px;
             overflow: hidden;
             box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
         }
+
         th, td {
             padding: 12px;
             text-align: center;
             border-bottom: 1px solid #ddd;
+            color: #444; /* Slightly darker text for table content */
         }
+
         th {
             background: #007bff;
             color: white;
             cursor: pointer;
         }
+
         th:hover {
             background: #0056b3;
         }
-        .btn-back {
-            display: inline-block;
-            padding: 10px 20px;
-            margin-top: 20px;
-            background: #666;
-            color: #fff;
-            border-radius: 8px;
+
+        tr:nth-child(even) {
+            background-color: #f9f9f9;
+        }
+
+        tr:hover {
+            background-color: #f1f1f1;
+        }
+
+        @media (max-width: 768px) {
+            th, td {
+                font-size: 14px;
+                padding: 10px;
+            }
+
+            .btn-back {
+                font-size: 14px;
+            }
+
+            .table-container {
+                overflow-x: auto;
+                -webkit-overflow-scrolling: touch; /* Smooth scrolling on iOS */
+            }
+
+            table {
+                width: 100%;
+                min-width: 600px; /* Ensure table doesn't shrink too much */
+            }
+        }
+
+        /* Global font color for better contrast */
+        body {
+            color: #333; /* Darker font color for better readability */
+            background-color: #fff; /* Ensure sufficient contrast with text */
+        }
+
+        a {
+            color: #007bff; /* Ensure links are clearly visible */
             text-decoration: none;
-            font-size: 1em;
         }
-        .btn-back:hover {
-            background: #888;
-        }
-        td:nth-child(2) {
-            text-align: left;
-            white-space: nowrap;
-            width: auto;
-        }
-        th:nth-child(2) {
-            text-align: center;
+
+        a:hover {
+            color: #0056b3; /* Darker shade on hover for better visibility */
         }
     </style>
 </head>
@@ -91,32 +118,34 @@
 
         <input type="text" id="searchBox" class="search-box" placeholder="🔍 Tìm kiếm..." onkeyup="searchTable()">
 
-        <table id="ticketTable">
-            <thead>
-                <tr>
-                    <th onclick="sortTable(0)">CODE <i class="fas fa-sort"></i></th>
-                    <th onclick="sortTable(1)">Tên <i class="fas fa-sort"></i></th>
-                    <th onclick="sortTable(2)">MSSV <i class="fas fa-sort"></i></th>
-                    <th onclick="sortTable(3)">Lớp <i class="fas fa-sort"></i></th>
-                    <th onclick="sortTable(4)">Email <i class="fas fa-sort"></i></th>
-                    <th onclick="sortTable(5)">SĐT <i class="fas fa-sort"></i></th>
-                    <th onclick="sortTable(6)">Trạng Thái <i class="fas fa-sort"></i></th>
-                </tr>
-            </thead>
-            <tbody>
-                {% for ticket in records %}
-                <tr>
-                    <td>{{ ticket.CODE }}</td>
-                    <td>{{ ticket.TEN }}</td>
-                    <td>{{ ticket.MSSV }}</td>
-                    <td>{{ ticket.LOP }}</td>
-                    <td>{{ ticket.MAIL }}</td>
-                    <td>{{ ticket.SDT | string }}</td>
-                    <td>{{ ticket.trangthai }}</td>
-                </tr>
-                {% endfor %}
-            </tbody>
-        </table>
+        <div class="table-container">
+            <table id="ticketTable">
+                <thead>
+                    <tr>
+                        <th onclick="sortTable(0)">CODE <i class="fas fa-sort"></i></th>
+                        <th onclick="sortTable(1)">Tên <i class="fas fa-sort"></i></th>
+                        <th onclick="sortTable(2)">MSSV <i class="fas fa-sort"></i></th>
+                        <th onclick="sortTable(3)">Lớp <i class="fas fa-sort"></i></th>
+                        <th onclick="sortTable(4)">Email <i class="fas fa-sort"></i></th>
+                        <th onclick="sortTable(5)">SĐT <i class="fas fa-sort"></i></th>
+                        <th onclick="sortTable(6)">Trạng Thái <i class="fas fa-sort"></i></th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for ticket in records %}
+                    <tr>
+                        <td>{{ ticket.CODE }}</td>
+                        <td>{{ ticket.TEN }}</td>
+                        <td>{{ ticket.MSSV }}</td>
+                        <td>{{ ticket.LOP }}</td>
+                        <td>{{ ticket.MAIL }}</td>
+                        <td>{{ ticket.SDT | string }}</td>
+                        <td>{{ ticket.trangthai }}</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
     </div>
 
     <script>

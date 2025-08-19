@@ -8,15 +8,30 @@
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     <script src="https://kit.fontawesome.com/a076d05399.js" crossorigin="anonymous"></script>
     <style>
-        body {
-            font-family: 'Inter', sans-serif;
+        .dashboard .card {
+            background: #fff;
+            padding: 20px;
+            border-radius: 12px;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+            text-align: center;
+            font-size: 1.2em;
+            font-weight: 600;
+            transition: transform 0.3s ease-in-out;
         }
-        .btn-secondary {
-            background-color: #666 !important;
-            color: #fff !important;
+
+        .dashboard .card:hover {
+            background: #f1f1f1;
+            transform: scale(1.05);
         }
-        .btn-secondary:hover {
-            background-color: #888 !important;
+
+        .dashboard .card h3 {
+            font-size: 1.3em;
+            font-weight: 600;
+        }
+
+        .dashboard .card p {
+            font-size: 1em;
+            color: #555;
         }
     </style>
 </head>
@@ -40,6 +55,10 @@
                 <h3><i class="fas fa-file-upload"></i> Tải Lên CSV</h3>
                 <p>Cập nhật dữ liệu vé</p>
             </a>
+            <a href="/send_emails" class="card">
+                <h3><i class="fas fa-envelope"></i> Gửi Email</h3>
+                <p>Gửi vé QR đến người nhận</p>
+            </a>            
         </div>
     </div>
 

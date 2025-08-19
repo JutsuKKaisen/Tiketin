@@ -1,0 +1,132 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+  <meta charset="UTF-8" />
+  <title>Gửi Email QR</title>
+  <link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}">
+  <script src="https://kit.fontawesome.com/a2d9d6a52b.js" crossorigin="anonymous"></script>
+  <style>
+    .email-container {
+      max-width: 960px;
+      margin: 0 auto;
+      padding: 30px;
+      background: #f9fbff;
+      border-radius: 12px;
+      box-shadow: 0 4px 10px rgba(0, 0, 0, 0.06);
+    }
+    .email-title {
+      font-size: 28px;
+      font-weight: bold;
+      color: #1d3557;
+      margin-bottom: 10px;
+    }
+    .email-desc {
+      font-size: 16px;
+      color: #555;
+      margin-bottom: 25px;
+    }
+    table.email-table {
+      width: 100%;
+      border-collapse: collapse;
+      background: white;
+      border-radius: 6px;
+      overflow: hidden;
+    }
+    table.email-table th, table.email-table td {
+      padding: 12px;
+      text-align: center;
+      border-bottom: 1px solid #ddd;
+      color: #444;
+    }
+    table.email-table thead {
+      background-color: #007bff;
+      color: white;
+    }
+    table.email-table tbody tr:nth-child(even) {
+      background-color: #f9f9f9;
+    }
+    .btn-send {
+      display: inline-block;
+      margin-top: 20px;
+      padding: 12px;
+      background-color: #0056b3;
+      color: white;
+      border: none;
+      border-radius: 8px;
+      font-size: 1em;
+      font-weight: 600;
+      cursor: pointer;
+    }
+    .btn-send:hover {
+      background-color: #003f8a;
+    }
+    .result-box {
+      margin-top: 20px;
+      font-weight: bold;
+    }
+  </style>
+</head>
+<body>
+  <div class="email-container">
+    <h1 class="email-title"><i class="fas fa-envelope"></i> Gửi Email Vé QR</h1>
+    <p class="email-desc">Dưới đây là danh sách các địa chỉ email sẽ nhận được vé QR (chưa gửi, đã có mã và ảnh QR):</p>
+
+    {% if emails %}
+      <table class="email-table">
+        <thead>
+          <tr>
+            <th>STT</th>
+            <th>Email</th>
+            <th>Họ tên</th>
+            <th>Mã CODE</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for entry in emails %}
+          <tr>
+            <td>{{ loop.index }}</td>
+            <td>{{ entry.email }}</td>
+            <td>{{ entry.name }}</td>
+            <td>{{ entry.code }}</td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+
+      <form id="sendForm" method="post">
+        <button type="submit" class="btn-send"><i class="fas fa-paper-plane"></i> Gửi Email</button>
+      </form>
+    {% else %}
+      <p style="color: red; font-weight: bold;">⚠ Không có người nhận đủ điều kiện để gửi email.</p>
+    {% endif %}
+
+    <div id="result" class="result-box"></div>
+    <div style="margin-top: 25px;">
+      <a href="/" class="link-light"><i class="fas fa-chevron-left"></i> Quay về trang quản trị</a>
+    </div>
+  </div>
+
+  <script>
+    const form = document.getElementById("sendForm");
+    const resultBox = document.getElementById("result");
+
+    if (form) {
+      form.addEventListener("submit", async function (e) {
+        e.preventDefault();
+        resultBox.innerHTML = "⏳ Đang gửi email, vui lòng chờ...";
+        resultBox.style.color = "#555";
+
+        try {
+          const res = await fetch("/send_emails", { method: "POST" });
+          const data = await res.json();
+          resultBox.innerHTML = data.message || data.error;
+          resultBox.style.color = res.ok ? "green" : "red";
+        } catch (err) {
+          resultBox.innerHTML = "❌ Lỗi kết nối tới máy chủ.";
+          resultBox.style.color = "red";
+        }
+      });
+    }
+  </script>
+</body>
+</html>

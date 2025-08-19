@@ -5,3 +5,6 @@ gspread
 oauth2client
 gunicorn
 python-dotenv
+pydrive2
+Pillow
+qrcode
